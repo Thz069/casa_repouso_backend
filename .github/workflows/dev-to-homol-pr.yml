@@ -15,13 +15,8 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          if gh pr list --head dev --base homol --json number | jq '.[] | .number' | grep -q .; then
-            echo "Pull Request already exists."
-            echo "::set-output name=exists::true"
-          else
-            echo "No existing Pull Request found."
-            echo "::set-output name=exists::false"
-          fi
+          pr_exists=$(gh pr list --head dev --base homol --json number | jq 'length > 0')
+          echo "exists=$pr_exists" >> $GITHUB_OUTPUT
 
       - name: Create Pull Request
         if: steps.check_pr.outputs.exists == 'false'

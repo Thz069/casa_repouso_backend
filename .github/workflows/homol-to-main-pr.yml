@@ -1,30 +1,28 @@
-name: Create PR: homol to main
+name: 'Create PR: homol to main'
 on:
   push:
     branches:
-      - homol
+      - 'homol'
 jobs:
   create_pull_request:
-    runs-on: ubuntu-latest
+    runs-on: 'ubuntu-latest'
     steps:
-      - name: Check out repository
-        uses: actions/checkout@v3
-
-      - name: Check for existing Pull Request
-        id: check_pr
+      - name: 'Check out repository'
+        uses: 'actions/checkout@v3'
+      - name: 'Check for existing Pull Request'
+        id: 'check_pr'
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_TOKEN: '${{ secrets.GITHUB_TOKEN }}'
         run: |
           pr_exists=$(gh pr list --head homol --base main --json number | jq 'length > 0')
           echo "exists=$pr_exists" >> $GITHUB_OUTPUT
-
-      - name: Create Pull Request
-        if: steps.check_pr.outputs.exists == 'false'
+      - name: 'Create Pull Request'
+        if: "steps.check_pr.outputs.exists == 'false'"
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_TOKEN: '${{ secrets.GITHUB_TOKEN }}'
         run: |
           gh pr create \
             --base main \
             --head homol \
             --title "[Automated] Merge homol into main" \
-            --body "This pull request was automatically created to merge changes from homol into main."
+            --body "This pull request was automatically created."

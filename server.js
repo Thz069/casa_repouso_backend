@@ -4,7 +4,7 @@
  * Configura e inicia o servidor Express, define middlewares, monta as rotas da API
  * e trata erros básicos.
  */
-
+require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
 // A importação do 'db' aqui garante que a conexão com o banco de dados

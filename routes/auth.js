@@ -31,7 +31,7 @@ router.post('/login', async (req, res) => {
 
     if (match) {
       const payload = { userId: user.id, name: user.nome_completo_atendente };
-      const token = jwt.sign(payload, 'seu-segredo-super-secreto-aqui', { expiresIn: '1h' });
+      const token = jwt.sign(payload, process.env.JWT_SECRET, { expiresIn: '1h' });
 
       res.json({
         success: true,

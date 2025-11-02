@@ -7,8 +7,9 @@
  * Também insere um atendente padrão para fins de desenvolvimento e simulação.
  */
 
+require('dotenv').config();
 const sqlite3 = require('sqlite3').verbose(); // Importa o driver sqlite3 no modo verbose para mais detalhes em erros.
-const DBSOURCE = "db.sqlite"; // Define o nome do arquivo que armazenará o banco de dados SQLite.
+const DBSOURCE = process.env.DB_SOURCE || "db.sqlite"; // Define o nome do arquivo que armazenará o banco de dados SQLite.
 
 /**
  * Objeto de conexão com o banco de dados SQLite.
@@ -28,6 +29,7 @@ let db = new sqlite3.Database(DBSOURCE, (err) => {
     db.run("PRAGMA foreign_keys = ON;", (pragmaErr) => {
       if (pragmaErr) {
         // Em produção, este erro seria logado.
+        console.error("Erro ao ativar chaves estrangeiras:", pragmaErr.message);
         // A falha em ativar chaves estrangeiras pode levar a inconsistências nos dados.
       }
     });
@@ -48,16 +50,18 @@ let db = new sqlite3.Database(DBSOURCE, (err) => {
         )`, (errTableAtendentes) => {
       if (errTableAtendentes) {
         // Erro ao criar a tabela 'atendentes'.
+        console.error("Erro ao criar tabela 'atendentes':", errTableAtendentes.message);
       } else {
-        // Insere um atendente padrão para desenvolvimento ou se a tabela estiver vazia.
-        // 'INSERT OR IGNORE' previne erro se o atendente com 'id' 'user01' já existir.
-        const insertDefaultAttendant = `INSERT OR IGNORE INTO atendentes (id, nome_usuario, hash_senha, nome_completo_atendente) VALUES (?, ?, ?, ?)`;
-        // ATENÇÃO: 'senha123hash' é um placeholder. Em produção, use hashes de senha seguros gerados por bibliotecas como bcrypt.
-        db.run(insertDefaultAttendant, ['user01', 'atendente', 'senha123hash', 'Atendente Principal'], function(errInsertAttendant) {
-          if (errInsertAttendant) {
-            // Erro ao inserir o atendente padrão.
-          } else if (this.changes > 0) {
-            // Atendente padrão inserido com sucesso.
+        // Verifica se já existe algum atendente no banco de dados.
+        const checkUserSql = "SELECT COUNT(*) as count FROM atendentes";
+        db.get(checkUserSql, [], (err, row) => {
+          if (err) {
+            console.error("Erro ao verificar atendentes:", err.message);
+            return;
+          }
+          // Se não houver atendentes, exibe uma mensagem no console.
+          if (row.count === 0) {
+            console.log("Nenhum atendente encontrado. Crie o primeiro atendente através do endpoint de registro da API.");
           }
         });
       }
